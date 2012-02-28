@@ -110,8 +110,7 @@
   [field-id type value]
   (swap! greeting-form
          (fn [old]
-           (let [field (get (:fields old) field-id {})
-                 field-status (assoc (new-status (-> old :fields field-id :status)
+           (let [field-status (assoc (new-status (-> old :fields field-id :status)
                                                  type
                                                  (validate field-id value))
                                 :value value)
