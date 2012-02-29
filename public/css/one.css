@@ -231,6 +231,7 @@ h1, h2 {
 h1 {
   font-family: "Chunkfive", serif;
   font-size: 4.4em;
+  text-align:center;
 }
 
 h2 {
@@ -296,7 +297,7 @@ h2 {
 #content {
 }
 
-#form, #greeting {
+#form, #greeting, #task-form, #task-list {
   margin: 0 auto;
   text-align: center;
 }
@@ -397,6 +398,28 @@ input[type="text"] {
   position: absolute;
   width: 254px;
   z-index: 1;
+}
+
+#task-input-label
+{
+  display: block;
+  margin: 0 auto;
+  width: 254px;
+}
+
+#task-input-label span
+{
+  color: #bbc4d7;
+  cursor: text;
+  display: block;
+  padding-top: 12px;
+  position: absolute;
+  width: 254px;
+  z-index: 1;
+}
+
+#task-list li {
+    list-style: none;
 }
 
 .clearfix {

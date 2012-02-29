@@ -19,6 +19,12 @@
            (fn [k r o n]
              (dispatch/fire :form-change {:old o :new n})))
 
+(def task-list (atom []))
+
+(add-watch task-list :task-list-change-key
+           (fn [k r o n]
+              (dispatch/fire :task-list-change {:old o :new n})))
+
 (defmulti ^:private new-status
   (fn [& args] (vec args)))
 
@@ -91,7 +97,7 @@
   an error message associated with the `:error` key."
   (fn [id _] id))
 
-(defmethod validate "name-input" [_ v]
+(defmethod validate "task-input" [_ v]
   (cond (= (count v) 0) :empty
         (= (count v) 1) :error
         :else :valid))
@@ -148,4 +154,4 @@
   (fn [t d]
     (let [form-data @greeting-form]
       (when (= (:status form-data) :finished)
-        (dispatch/fire :greeting {:name (-> form-data :fields "name-input" :value)})))))
+        (swap! task-list conj (-> form-data :fields "task-input" :value))))))

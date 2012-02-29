@@ -1,7 +1,7 @@
 (ns ^{:doc "Render the views for the application."}
   one.sample.view
   (:use [domina :only (set-html! set-styles! styles by-id set-style!
-                       by-class value set-value! set-text! nodes single-node)]
+                       by-class value set-value! set-text! nodes single-node html append!)]
         [domina.xpath :only (xpath)]
         [one.browser.animation :only (play)])
   (:require-macros [one.sample.snippets :as snippets])
@@ -9,7 +9,8 @@
             [goog.events.KeyHandler :as key-handler]
             [clojure.browser.event :as event]
             [one.dispatch :as dispatch]
-            [one.sample.animation :as fx]))
+            [one.sample.animation :as fx]
+            [clojure.set :as set]))
 
 (def ^{:doc "A map which contains chunks of HTML which may be used
   when rendering views."}
@@ -24,10 +25,10 @@
 (defmethod render-button :default [_])
 
 (defmethod render-button [:finished :editing] [_]
-  (fx/disable-button "greet-button"))
+  (fx/disable-button "task-button"))
 
 (defmethod render-button [:editing :finished] [_]
-  (fx/enable-button "greet-button"))
+  (fx/enable-button "task-button"))
 
 (defmulti render-form-field
   "Render a form field based on the current state transition. Form
@@ -90,7 +91,7 @@
   `:field-changed` and `:editing-field` events."
   [field-id]
   (let [field (by-id field-id)
-        keyboard (goog.events.KeyHandler. (by-id "form"))]
+        keyboard (goog.events.KeyHandler. (by-id "task-form"))]
     (event/listen field
                   "blur"
                   #(dispatch/fire [:field-finished field-id] (value field)))
@@ -103,7 +104,7 @@
     (event/listen keyboard
                   "key"
                   (fn [e] (when (= (.-keyCode e) key-codes/ENTER)
-                           (do (.blur (by-id "name-input") ())
+                           (do (.blur (by-id "task-input") ())
                                (dispatch/fire :form-submit)))))))
 
 (defmulti render
@@ -112,12 +113,11 @@
   :state)
 
 (defmethod render :init [_]
-  (fx/initialize-views (:form snippets) (:greeting snippets))
-  (add-input-event-listeners "name-input")
-  (event/listen (by-id "greet-button")
+  (fx/initialize-task-views (:tasks snippets))
+  (add-input-event-listeners "task-input")
+  (event/listen (by-id "task-button")
                 "click"
-                #(dispatch/fire :greeting
-                                {:name (value (by-id "name-input"))})))
+                #(dispatch/fire :form-submit)))
 
 (defmethod render :form [{:keys [state error name]}]
   (fx/show-form)
@@ -148,3 +148,14 @@
                        (render-form-field s))
                      (render-button [(-> m :old :status)
                                      (-> m :new :status)] )))
+
+
+(defn render-new-tasks [tasks]
+  )
+
+(dispatch/react-to #{:task-list-change}
+                   (fn [_ {:keys [old new]}]
+                     (let [new-tasks (set/difference (set new) (set old))
+                           ul (by-id "task-list")]
+                       (doseq [t new-tasks]
+                         (append! ul (str "<li>" t "</t>"))))))

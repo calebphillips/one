@@ -38,6 +38,20 @@
   
   )
 
+
+(def task-form "//div[@id='task-form']")
+(def task-label "//label[@id='task-input-label']/span")
+
+(defn initialize-task-views
+  [task-html]
+  (let [content (xpath "//div[@id='content']")]
+    (destroy-children! content)
+    (set-html! content task-html)
+    ;; Required for IE8 to work correctly
+    (style/setOpacity (single-node (xpath task-label)) 1)
+    (set-styles! (by-id "task-button") {:opacity "0.2" :disabled true})
+    (play task-form form-in {:after #(.focus (by-id "task-input") ())})))
+
 (defn label-move-up
   "Move the passed input field label above the input field. Run when
   the field gets focus and is empty."

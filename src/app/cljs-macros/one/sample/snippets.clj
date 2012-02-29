@@ -12,4 +12,5 @@
   design templates."
   []
   {:form (snippet "form.html" [:div#form])
-   :greeting (snippet "greeting.html" [:div#greeting])})
+   :greeting (snippet "greeting.html" [:div#greeting])
+   :tasks (snippet "tasks.html" [:div#tasks])})
