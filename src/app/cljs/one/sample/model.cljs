@@ -154,4 +154,4 @@
   (fn [t d]
     (let [form-data @greeting-form]
       (when (= (:status form-data) :finished)
-        (swap! task-list conj (-> form-data :fields "task-input" :value))))))
+        (dispatch/fire :add-task {:task (-> form-data :fields "task-input" :value)})))))

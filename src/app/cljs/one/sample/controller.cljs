@@ -2,7 +2,7 @@
   application state."}
   one.sample.controller
   (:use [one.browser.remote :only (request)]
-        [one.sample.model :only (state)])
+        [one.sample.model :only (state task-list)])
   (:require [cljs.reader :as reader]
             [clojure.browser.event :as event]
             [one.dispatch :as dispatch]
@@ -24,9 +24,6 @@
   update the state to `:greeting` while adding `:name` and `:exists`
   values to the application's state."
   :type)
-
-(defmethod action :init [_]
-  (reset! state {:state :init}))
 
 (defmethod action :form [_]
   (when-not (#{:form :init} (:state @state))
@@ -53,6 +50,20 @@
            :on-error #(swap! state assoc :error "Error communicating with server.")
            :content (str "data=" (pr-str {:fn f :args data}))))
 
+;; TODO Elimiate dup
+(defn remote-get
+  [f data on-success]
+  (request f (str (host) "/remote")
+           :method "GET"
+           :on-success #(on-success (reader/read-string (:body %)))
+           :on-error #(swap! state assoc :error "Error communicating with server.")
+           :content (str "data=" (pr-str {:fn f :args data}))))
+
+;; Nead to read-string the task list.
+(defmethod action :init [_]
+  (reset! state {:state :init})
+  (remote :list-tasks {} #(reset! task-list (:task-list %))))
+
 (defn add-name-callback
   "This is the success callback function which will be called when a
   request is successful. Accepts a name and a map of response data.
@@ -66,5 +77,11 @@
 (defmethod action :greeting [{name :name}]
   (remote :add-name {:name name} #(add-name-callback name %)))
 
-(dispatch/react-to #{:init :form :greeting}
+(defn add-task-callback [task response]
+  (swap! task-list conj task))
+
+(defmethod action :add-task [{task :task}]
+  (remote :add-task {:task task} #(add-task-callback task %)))
+
+(dispatch/react-to #{:init :form :greeting :add-task}
                    (fn [t d] (action (assoc d :type t))))

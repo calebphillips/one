@@ -149,7 +149,7 @@
                      (render-button [(-> m :old :status)
                                      (-> m :new :status)] )))
 
-
+;; TODO Better way to add the li?
 (defn render-new-tasks [tasks]
   (let [ul (by-id "task-list")]
     (doseq [t tasks]
@@ -157,7 +157,7 @@
 
 (defn reset-form []
   (set-value! (by-id "task-input") "")
-  (.focus (by-id "task-input")))
+  (.focus (by-id "task-input") ()))
 
 (dispatch/react-to #{:task-list-change}
                    (fn [_ {:keys [old new]}]
