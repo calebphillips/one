@@ -104,17 +104,16 @@
   "Move the greeting cloud out of view and show the form. Run when the
   back button is clicked from the greeting view."
   []
-  (play-animation (serial (parallel (bind cloud {:effect :fade-out-and-hide :time 500})
-                                    (bind form
+  (play-animation (serial (parallel (bind task-form
                                           {:effect :color :time 300} ; Dummy animation for delay purposes
                                           form-in)
-                                    (bind label fade-in move-down)))
+                                    (bind task-label fade-in move-down)))
                   {;; Because IE8 won't hide the button, we need to
                    ;; toggle it between displaying inline and none
-                   :before #(set-styles! (by-id "greet-button") {:display "inline"})
+                   :before #(set-styles! (by-id "task-button") {:display "inline"})
                    :after #(do
-                             (gforms/setDisabled (by-id "name-input") false)
-                             (.focus (by-id "name-input") ()))}))
+                             (gforms/setDisabled (by-id "task-input") false)
+                             (.focus (by-id "task-input") ()))}))
 
 (comment ;; Switch between greeting and form views
 

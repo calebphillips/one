@@ -121,8 +121,8 @@
 
 (defmethod render :form [{:keys [state error name]}]
   (fx/show-form)
-  (set-value! (by-id "name-input") "")
-  (dispatch/fire [:field-finished "name-input"] ""))
+  (set-value! (by-id "task-input") "")
+  (dispatch/fire [:field-finished "task-input"] ""))
 
 (defmethod render :greeting [{:keys [state name exists]}]
   (set-text! (single-node (by-class "name")) name)
@@ -151,11 +151,16 @@
 
 
 (defn render-new-tasks [tasks]
-  )
+  (let [ul (by-id "task-list")]
+    (doseq [t tasks]
+      (append! ul (str "<li><input type='checkbox'> " t "</t>")))))
+
+(defn reset-form []
+  (set-value! (by-id "task-input") "")
+  (.focus (by-id "task-input")))
 
 (dispatch/react-to #{:task-list-change}
                    (fn [_ {:keys [old new]}]
-                     (let [new-tasks (set/difference (set new) (set old))
-                           ul (by-id "task-list")]
-                       (doseq [t new-tasks]
-                         (append! ul (str "<li>" t "</t>"))))))
+                     (render-new-tasks
+                      (set/difference (set new) (set old)))
+                     (reset-form)))
