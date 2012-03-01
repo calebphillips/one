@@ -35,34 +35,23 @@
   (uri/getHost (.toString window.location ())))
 
 (defn remote
-  "Accepts a function id (an identifier for this request), data (the
-  data to send to the server) and a callback function which will be
-  called if the transmission is successful. Perform an Ajax `POST`
-  request to the backend API which sends the passed data to the
-  server.
+  [method f data on-success]
+  (let [data-str (str "data=" (pr-str {:fn f :args data}))
+        query-str (when (= "GET" method) (str "?" data-str))
+        post-data (when (= "POST" method) data-str)]
+    (request f (str (host) "/remote" query-str)
+             :method method
+             :on-success #(on-success (reader/read-string (:body %)))
+             :on-error #(swap! state assoc :error "Error communicating with server.")
+             :content post-data)))
 
-  A tranmission error will add an error message to the application's
-  state."
-  [f data on-success]
-  (request f (str (host) "/remote")
-           :method "POST"
-           :on-success #(on-success (reader/read-string (:body %)))
-           :on-error #(swap! state assoc :error "Error communicating with server.")
-           :content (str "data=" (pr-str {:fn f :args data}))))
+(def r-post (partial remote "POST"))
 
-;; TODO Elimiate dup
-(defn remote-get
-  [f data on-success]
-  (request f (str (host) "/remote")
-           :method "GET"
-           :on-success #(on-success (reader/read-string (:body %)))
-           :on-error #(swap! state assoc :error "Error communicating with server.")
-           :content (str "data=" (pr-str {:fn f :args data}))))
+(def r-get (partial remote "GET"))
 
-;; Nead to read-string the task list.
 (defmethod action :init [_]
   (reset! state {:state :init})
-  (remote :list-tasks {} #(reset! task-list (:task-list %))))
+  (r-get :list-tasks {} #(reset! task-list (:task-list %))))
 
 (defn add-name-callback
   "This is the success callback function which will be called when a
@@ -75,13 +64,13 @@
                    :exists (boolean (:exists response))))))
 
 (defmethod action :greeting [{name :name}]
-  (remote :add-name {:name name} #(add-name-callback name %)))
+  (r-post :add-name {:name name} #(add-name-callback name %)))
 
 (defn add-task-callback [task response]
   (swap! task-list conj task))
 
 (defmethod action :add-task [{task :task}]
-  (remote :add-task {:task task} #(add-task-callback task %)))
+  (r-post :add-task {:task task} #(add-task-callback task %)))
 
 (dispatch/react-to #{:init :form :greeting :add-task}
                    (fn [t d] (action (assoc d :type t))))
