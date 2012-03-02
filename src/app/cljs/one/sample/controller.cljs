@@ -53,24 +53,8 @@
   (reset! state {:state :init})
   (r-get :list-tasks {} #(reset! task-list (:task-list %))))
 
-(defn add-name-callback
-  "This is the success callback function which will be called when a
-  request is successful. Accepts a name and a map of response data.
-  Sets the current state to `:greeting` and adds the `:name` and
-  `:exists` values to the application's state."
-  [name response]
-  (swap! state (fn [old]
-                 (assoc (assoc old :state :greeting :name name)
-                   :exists (boolean (:exists response))))))
-
-(defmethod action :greeting [{name :name}]
-  (r-post :add-name {:name name} #(add-name-callback name %)))
-
-(defn add-task-callback [task response]
-  (swap! task-list conj task))
-
 (defmethod action :add-task [{task :task}]
-  (r-post :add-task {:task task} #(add-task-callback task %)))
+  (r-post :add-task {:task task} #(swap! task-list conj task)))
 
-(dispatch/react-to #{:init :form :greeting :add-task}
+(dispatch/react-to #{:init :form :add-task}
                    (fn [t d] (action (assoc d :type t))))

@@ -8,35 +8,8 @@
   (:require [goog.dom.forms :as gforms]
             [goog.style :as style]))
 
-(def form "//div[@id='form']")
-(def cloud "//div[@id='greeting']")
-(def label "//label[@id='name-input-label']/span")
-
 (def ^:private
   form-in {:effect :fade :start 0 :end 1 :time 800})
-
-(defn initialize-views
-  "Accepts the form and greeting view HTML and adds them to the
-  page. Animates the form sliding in from above. This function must be
-  run before any other view functions. It may be called from any state
-  to reset the UI."
-  [form-html greeting-html]
-  (let [content (xpath "//div[@id='content']")]
-    (destroy-children! content)
-    (set-html! content form-html)
-    (append! content greeting-html)
-    ;; Required for IE8 to work correctly
-    (style/setOpacity (single-node (xpath label)) 1)
-    (set-styles! (xpath cloud) {:opacity "0" :display "none" :margin-top "-500px"})
-    (set-styles! (by-id "greet-button") {:opacity "0.2" :disabled true})
-    (play form form-in {:after #(.focus (by-id "name-input") ())})))
-
-(comment ;; Try it
-
-  (initialize-views (:form one.sample.view/snippets)
-                    (:greeting one.sample.view/snippets))
-  
-  )
 
 
 (def task-form "//div[@id='task-form']")
@@ -68,9 +41,7 @@
 (def move-down [{:effect :fade :end 1 :time 200}
                 {:effect :color :end "#BBC4D7" :time 200}
                 {:effect :slide :down 40 :time 200}])
-
 (def fade-in {:effect :fade :end 1 :time 400})
-
 (def fade-out {:effect :fade :end 0 :time 400})
 
 (defn label-move-down
@@ -86,28 +57,16 @@
   (label-move-down label)
   )
 
-(defn show-greeting
-  "Move the form out of view and the greeting into view. Run when the
-  submit button is clicked and the form has valid input."
-  []
-  (let [e {:effect :fade :end 0 :time 500}]
-    (play-animation #(parallel (bind form e)
-                               (bind label e) ; Since the label won't fade in IE
-                               (bind cloud
-                                     {:effect :color :time 500} ; Dummy animation for delay purposes
-                                     {:effect :fade-in-and-show :time 600}))
-                    {:before #(gforms/setDisabled (by-id "name-input") true)
-                     ;; We need this next one because IE8 won't hide the button
-                     :after #(set-styles! (by-id "greet-button") {:display "none"})})))
 
 (defn show-form
   "Move the greeting cloud out of view and show the form. Run when the
   back button is clicked from the greeting view."
   []
-  (play-animation (serial (parallel (bind task-form
-                                          {:effect :color :time 300} ; Dummy animation for delay purposes
-                                          form-in)
-                                    (bind task-label fade-in move-down)))
+  (play-animation (serial (parallel 
+                           (bind task-form
+                                 {:effect :color :time 300} ; Dummy animation for delay purposes
+                                 form-in)
+                           (bind task-label fade-in move-down)))
                   {;; Because IE8 won't hide the button, we need to
                    ;; toggle it between displaying inline and none
                    :before #(set-styles! (by-id "task-button") {:display "inline"})
@@ -118,7 +77,6 @@
 (comment ;; Switch between greeting and form views
 
   (label-move-up label)
-  (show-greeting)
   (show-form)
   )
 
@@ -140,13 +98,11 @@
 
 (comment ;; Examples of all effects
 
-  (initialize-views (:form one.sample.view/snippets)
-                    (:greeting one.sample.view/snippets))
+  (initialize-views (:form one.sample.view/snippets))
   (label-move-up label)
   (label-fade-out label)
-  (show-greeting)
   (show-form)
 
-  (disable-button "greet-button")
-  (enable-button "greet-button")
+  (disable-button "task-button")
+  (enable-button "task-button")
   )

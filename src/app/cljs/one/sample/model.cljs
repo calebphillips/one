@@ -11,11 +11,11 @@
              (dispatch/fire :state-change n)))
 
 (def ^{:private true
-       :doc "An atom containing the state of the greeting form and
+       :doc "An atom containing the state of the task form and
   each of its fields."}
-  greeting-form (atom {}))
+  task-form (atom {}))
 
-(add-watch greeting-form :form-change-key
+(add-watch task-form :form-change-key
            (fn [k r o n]
              (dispatch/fire :form-change {:old o :new n})))
 
@@ -114,7 +114,7 @@
   "Accepts a field-id and value. Validates the field and updates the
   greeting form atom."
   [field-id type value]
-  (swap! greeting-form
+  (swap! task-form
          (fn [old]
            (let [field-status (assoc (new-status (-> old :fields field-id :status)
                                                  type
@@ -127,7 +127,7 @@
   "Update the form state for a given field to indicate that the form
   is still being edited."
   [id]
-  (swap! greeting-form
+  (swap! task-form
          (fn [old]
            (let [field-map (-> old :fields id)
                  status (or (:status field-map) :empty)
@@ -152,6 +152,7 @@
 
 (dispatch/react-to #{:form-submit}
   (fn [t d]
-    (let [form-data @greeting-form]
+    (let [form-data @task-form]
       (when (= (:status form-data) :finished)
-        (dispatch/fire :add-task {:task (-> form-data :fields "task-input" :value)})))))
+        (dispatch/fire :add-task
+                       {:task (-> form-data :fields "task-input" :value)})))))

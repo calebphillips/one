@@ -124,11 +124,6 @@
   (set-value! (by-id "task-input") "")
   (dispatch/fire [:field-finished "task-input"] ""))
 
-(defmethod render :greeting [{:keys [state name exists]}]
-  (set-text! (single-node (by-class "name")) name)
-  (set-text! (single-node (by-class "again")) (if exists "again" ""))
-  (fx/show-greeting))
-
 (dispatch/react-to #{:state-change} (fn [_ m] (render m)))
 
 (defn- form-fields-status
