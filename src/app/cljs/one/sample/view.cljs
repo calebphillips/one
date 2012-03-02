@@ -1,7 +1,8 @@
 (ns ^{:doc "Render the views for the application."}
   one.sample.view
   (:use [domina :only (set-html! set-styles! styles by-id set-style!
-                       by-class value set-value! set-text! nodes single-node html append!)]
+                                 by-class value set-value! set-text! nodes single-node
+                                 html append!)]
         [domina.xpath :only (xpath)]
         [one.browser.animation :only (play)])
   (:require-macros [one.sample.snippets :as snippets])
@@ -9,8 +10,7 @@
             [goog.events.KeyHandler :as key-handler]
             [clojure.browser.event :as event]
             [one.dispatch :as dispatch]
-            [one.sample.animation :as fx]
-            [clojure.set :as set]))
+            [one.sample.animation :as fx]))
 
 (def ^{:doc "A map which contains chunks of HTML which may be used
   when rendering views."}
@@ -162,5 +162,5 @@
 (dispatch/react-to #{:task-list-change}
                    (fn [_ {:keys [old new]}]
                      (render-new-tasks
-                      (set/difference (set new) (set old)))
+                      (filter #(not ((set old) %)) new))
                      (reset-form)))
