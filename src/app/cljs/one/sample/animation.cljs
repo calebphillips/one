@@ -11,7 +11,6 @@
 (def ^:private
   form-in {:effect :fade :start 0 :end 1 :time 800})
 
-
 (def task-form "//div[@id='task-form']")
 (def task-label "//label[@id='task-input-label']/span")
 
@@ -23,7 +22,7 @@
     ;; Required for IE8 to work correctly
     (style/setOpacity (single-node (xpath task-label)) 1)
     (set-styles! (by-id "task-button") {:opacity "0.2" :disabled true})
-    (play task-form form-in {:after #(.focus (by-id "task-input") ())})))
+    (play "//div[@id='content']" form-in {:after #(.focus (by-id "task-input") ())})))
 
 (defn label-move-up
   "Move the passed input field label above the input field. Run when

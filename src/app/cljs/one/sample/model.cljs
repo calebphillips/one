@@ -3,7 +3,10 @@
  one.sample.model
   (:require [one.dispatch :as dispatch]))
 
-(def ^{:doc "An atom containing a map which is the application's current state."}
+(def ^{:doc
+       "An atom containing a map which is the application's current state.
+        The only state is :init right now, but hopefully :log-in and :preferences
+        may come later"}
   state (atom {}))
 
 (add-watch state :state-change-key
@@ -12,14 +15,16 @@
 
 (def ^{:private true
        :doc "An atom containing the state of the task form and
-  each of its fields."}
+             each of its fields."}
   task-form (atom {}))
 
 (add-watch task-form :form-change-key
            (fn [k r o n]
              (dispatch/fire :form-change {:old o :new n})))
 
-(def task-list (atom []))
+(def ^{:doc "An atom containing the list of tasks, kept in sync
+             with the list on the server by the controller."}
+  task-list (atom []))
 
 (add-watch task-list :task-list-change-key
            (fn [k r o n]
