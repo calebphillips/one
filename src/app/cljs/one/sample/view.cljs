@@ -119,11 +119,6 @@
                 "click"
                 #(dispatch/fire :form-submit)))
 
-(defmethod render :form [{:keys [state error name]}]
-  (fx/show-form)
-  (set-value! (by-id "task-input") "")
-  (dispatch/fire [:field-finished "task-input"] ""))
-
 (dispatch/react-to #{:state-change} (fn [_ m] (render m)))
 
 (defn- form-fields-status

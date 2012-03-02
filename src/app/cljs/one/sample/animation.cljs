@@ -50,36 +50,6 @@
   [label]
   (play label move-down))
 
-(comment ;; Examples of label effects.
-  
-  (label-move-up label)
-  (label-fade-out label)
-  (label-move-down label)
-  )
-
-
-(defn show-form
-  "Move the greeting cloud out of view and show the form. Run when the
-  back button is clicked from the greeting view."
-  []
-  (play-animation (serial (parallel 
-                           (bind task-form
-                                 {:effect :color :time 300} ; Dummy animation for delay purposes
-                                 form-in)
-                           (bind task-label fade-in move-down)))
-                  {;; Because IE8 won't hide the button, we need to
-                   ;; toggle it between displaying inline and none
-                   :before #(set-styles! (by-id "task-button") {:display "inline"})
-                   :after #(do
-                             (gforms/setDisabled (by-id "task-input") false)
-                             (.focus (by-id "task-input") ()))}))
-
-(comment ;; Switch between greeting and form views
-
-  (label-move-up label)
-  (show-form)
-  )
-
 (defn disable-button
   "Accepts an element id for a button and disables it. Fades the
   button to 0.2 opacity."
@@ -96,13 +66,3 @@
     (gforms/setDisabled button false)
     (play button fade-in)))
 
-(comment ;; Examples of all effects
-
-  (initialize-views (:form one.sample.view/snippets))
-  (label-move-up label)
-  (label-fade-out label)
-  (show-form)
-
-  (disable-button "task-button")
-  (enable-button "task-button")
-  )

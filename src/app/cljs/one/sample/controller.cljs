@@ -15,19 +15,8 @@
   function dispatches on the value of the `:type` key and currently
   supports `:init`, `:form`, and `:greeting` actions.
 
-  The `:init` action will initialize the appliation's state.
-
-  The `:form` action will only update the status atom, setting its state
-  to `:from`.
-
-  The `:greeting` action will send the entered name to the server and
-  update the state to `:greeting` while adding `:name` and `:exists`
-  values to the application's state."
+  The `:init` action will initialize the appliation's state. "
   :type)
-
-(defmethod action :form [_]
-  (when-not (#{:form :init} (:state @state))
-    (swap! state assoc :state :form)))
 
 (defn host
   "Get the name of the host which served this script."
@@ -46,8 +35,7 @@
              :content post-data)))
 
 (def r-post (partial remote "POST"))
-
-(def r-get (partial remote "GET"))
+(def r-get  (partial remote "GET"))
 
 (defmethod action :init [_]
   (reset! state {:state :init})
@@ -56,5 +44,5 @@
 (defmethod action :add-task [{task :task}]
   (r-post :add-task {:task task} #(swap! task-list conj task)))
 
-(dispatch/react-to #{:init :form :add-task}
+(dispatch/react-to #{:init :add-task}
                    (fn [t d] (action (assoc d :type t))))
