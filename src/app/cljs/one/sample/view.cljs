@@ -56,35 +56,17 @@
 (defmethod render-form-field [:valid :editing-valid] [{:keys [id]}]
   (play (label-xpath id) fx/fade-in))
 
-(defmethod render-form-field [:editing :error] [{:keys [id error]}]
-  (let [error-element (by-id (str id "-error"))]
-    (set-style! error-element "opacity" "0")
-    (set-html! error-element error)
-    (play error-element fx/fade-in)))
+(defn- swap-label-messages [id message]
+  (let [lbl (label-xpath id)]
+    (play lbl (assoc fx/fade-out :time 100)
+             {:name "fade out label"})
+    (play lbl fx/fade-in {:before #(set-text! (xpath lbl) message)})))
 
-(defn- swap-error-messages
-  "Accepts an id and an error message and fades the old error message
-  out and the new one in."
-  [id error]
-  (let [error-element (by-id (str id "-error"))]
-    (play error-element fx/fade-out
-             {:name "fade out error"})
-    (play error-element fx/fade-in {:before #(set-html! error-element error)})))
+(defmethod render-form-field [:editing :editing-valid] [{:keys [id]}]
+  (swap-label-messages id "Press enter to create task."))
 
-(defmethod render-form-field [:error :editing-error] [{:keys [id error]}]
-  (swap-error-messages id error))
-
-(defmethod render-form-field [:editing-error :error] [{:keys [id error]}]
-  (swap-error-messages id error))
-
-(defmethod render-form-field [:editing-error :editing-valid] [{:keys [id]}]
-  (let [error-element (by-id (str id "-error"))]
-    (play error-element (assoc fx/fade-out :time 200))))
-
-(defmethod render-form-field [:editing-error :empty] [{:keys [id]}]
-  (let [error-element (by-id (str id "-error"))]
-    (play error-element (assoc fx/fade-out :time 200))
-    (fx/label-move-down (label-xpath id))))
+(defmethod render-form-field [:editing-valid :editing] [{:keys [id]}]
+  (swap-label-messages id "Enter task description."))
 
 (defn- add-input-event-listeners
   "Accepts a field-id and creates listeners for blur and focus events which will then fire
@@ -147,6 +129,7 @@
 
 (defn reset-form []
   (set-value! (by-id "task-input") "")
+  (dispatch/fire [:field-finished "task-input"] "")
   (.focus (by-id "task-input") ()))
 
 (dispatch/react-to #{:task-list-change}

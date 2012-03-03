@@ -65,6 +65,9 @@
 (defmethod new-status [:editing-valid :change :valid] [p e f]
   {:status :editing-valid})
 
+(defmethod new-status [:editing-valid :change :empty] [p e f]
+  {:status :editing})
+
 (defmethod new-status [:editing-valid :finished :valid] [p e f]
   {:status :valid})
 
