@@ -38,33 +38,33 @@
 
 (defmethod render-form-field :default [_])
 
-(defn- label-xpath
-  "Accepts an element id for an input field and return the xpath
-  string to the label for that field."
-  [id]
-  (str "//label[@id='" id "-label']/span"))
+;; (defn- label-xpath
+;;   "Accepts an element id for an input field and return the xpath
+;;   string to the label for that field."
+;;   [id]
+;;   (str "//label[@id='" id "-label']/span"))
 
-(defmethod render-form-field [:editing-valid :valid] [{:keys [id]}]
-  (fx/label-fade-out (label-xpath id)))
+;; (defmethod render-form-field [:editing-valid :valid] [{:keys [id]}]
+;;   (fx/label-fade-out (label-xpath id)))
 
-(defmethod render-form-field [:valid :editing-valid] [{:keys [id]}]
-  (play (label-xpath id) fx/fade-in))
+;; (defmethod render-form-field [:valid :editing-valid] [{:keys [id]}]
+;;   (play (label-xpath id) fx/fade-in))
 
-(defn- swap-label-messages [id message]
-  (let [lbl (label-xpath id)]
-    (play lbl (assoc fx/fade-out :time 100)
-             {:name "fade out label"})
-    (play lbl fx/fade-in {:before #(set-text! (xpath lbl) message)})))
+;; (defn- swap-label-messages [id message]
+;;   (let [lbl (label-xpath id)]
+;;     (play lbl (assoc fx/fade-out :time 100)
+;;              {:name "fade out label"})
+;;     (play lbl fx/fade-in {:before #(set-text! (xpath lbl) message)})))
 
-(defmethod render-form-field [:valid :empty] [{:keys [id]}]
-  (swap-label-messages id "Enter task description.")
-  (play (label-xpath id) fx/fade-in))
+;; (defmethod render-form-field [:valid :empty] [{:keys [id]}]
+;;   (swap-label-messages id "Enter task description.")
+;;   (play (label-xpath id) fx/fade-in))
 
-(defmethod render-form-field [:editing :editing-valid] [{:keys [id]}]
-  (swap-label-messages id "Press enter to create task."))
+;; (defmethod render-form-field [:editing :editing-valid] [{:keys [id]}]
+;;   (swap-label-messages id "Press enter to create task."))
 
-(defmethod render-form-field [:editing-valid :editing] [{:keys [id]}]
-  (swap-label-messages id "Enter task description."))
+;; (defmethod render-form-field [:editing-valid :editing] [{:keys [id]}]
+;;   (swap-label-messages id "Enter task description."))
 
 (defn- add-input-event-listeners
   "Accepts a field-id and creates listeners for blur and focus events which will then fire
