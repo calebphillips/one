@@ -382,24 +382,6 @@ input[type="text"] {
   text-align: center;
 }
 
-#name-input-label
-{
-  display: block;
-  margin: 0 auto;
-  width: 254px;
-}
-
-#name-input-label span
-{
-  color: #bbc4d7;
-  cursor: text;
-  display: block;
-  padding-top: 12px;
-  position: absolute;
-  width: 254px;
-  z-index: 1;
-}
-
 #task-input-label
 {
   display: block;
@@ -409,11 +391,12 @@ input[type="text"] {
 
 #task-input-label span
 {
-  color: #bbc4d7;
+  color: #53607b;
   cursor: text;
   display: block;
   padding-top: 12px;
-  position: absolute;
+  padding-bottom: 10px;
+  /* position: absolute; */
   width: 254px;
   z-index: 1;
 }

@@ -44,12 +44,6 @@
   [id]
   (str "//label[@id='" id "-label']/span"))
 
-(defmethod render-form-field [:empty :editing] [{:keys [id]}]
-  (fx/label-move-up (label-xpath id)))
-
-(defmethod render-form-field [:editing :empty] [{:keys [id]}]
-  (fx/label-move-down (label-xpath id)))
-
 (defmethod render-form-field [:editing-valid :valid] [{:keys [id]}]
   (fx/label-fade-out (label-xpath id)))
 
@@ -61,6 +55,10 @@
     (play lbl (assoc fx/fade-out :time 100)
              {:name "fade out label"})
     (play lbl fx/fade-in {:before #(set-text! (xpath lbl) message)})))
+
+(defmethod render-form-field [:valid :empty] [{:keys [id]}]
+  (swap-label-messages id "Enter task description.")
+  (play (label-xpath id) fx/fade-in))
 
 (defmethod render-form-field [:editing :editing-valid] [{:keys [id]}]
   (swap-label-messages id "Press enter to create task."))
