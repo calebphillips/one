@@ -1,0 +1,22 @@
+h1 {
+    font-family: "Chunkfive", serif;
+    font-size: 3.0em;
+    margin-bottom: 15px;
+}
+
+ul#task-list {
+    margin-left: 0;
+}
+
+ul#task-list li {
+    list-style-type: none;
+}
+
+@font-face {
+  font-family: "Chunkfive";
+  src: url("fonts/Chunkfive-webfont.eot");
+  src: local("☺"),
+    url("fonts/Chunkfive-webfont.woff") format("woff"),
+    url("fonts/Chunkfive-webfont.otf") format("opentype"),
+    url("fonts/Chunkfive-webfont.svg#Chunkfive-webfont") format("svg");
+}

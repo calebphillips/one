@@ -26,6 +26,16 @@
              with the list on the server by the controller."}
   task-list (atom []))
 
+(defn task-list-event [old new]
+  (let [load? (> (- (count new) (count old)) 1)
+        grouped (group-by :id (concat old new))
+        added (first (filter (fn [[id tasks]] (= 1 (count tasks))) grouped))
+        with-diff (first (remove (fn [[id tasks]] (apply = tasks)) grouped))]
+    (cond
+     load? [:tasks-loaded new]
+     added [:task-added (first (second added))]
+     with-diff [:task-toggled (let [[id [old new]] with-diff] {:id id :complete (:complete new)})])))
+
 (add-watch task-list :task-list-change-key
            (fn [k r o n]
               (dispatch/fire :task-list-change {:old o :new n})))

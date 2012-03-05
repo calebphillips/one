@@ -1,6 +1,5 @@
 (ns one.sample.test.model
   (:use [clojure.test]
-        [one.sample.api :only (*database*)]
         [one.test :only (cljs-eval)]
         [clojure.java.browse :only (browse-url)]
         [cljs.repl :only (-setup -tear-down)]
@@ -25,12 +24,22 @@
 (use-fixtures :once setup)
 
 (deftest test-set-editing
-  (cljs-eval one.sample.model (reset! greeting-form {}))
-  (is (= {:fields {"name-input" {:status :editing, :value nil}}, :status :finished}
+  (cljs-eval one.sample.model (reset! task-form {}))
+  (is (= {:fields {"task-input" {:status :editing, :value nil}}, :status :finished}
          (cljs-eval one.sample.model
-                    (set-editing "name-input")
-                    (deref greeting-form)))))
+                    (set-editing "task-input")
+                    (deref task-form)))))
 
-(deftest test-set-field-value
 
-  )
+(deftest test-task-list-event
+  (is (= [:task-added {:id 1 :description "Do this"}]
+         (cljs-eval one.sample.model
+                    (task-list-event []
+                                     [{:id 1 :description "Do this"}]))))
+  (is (= [:tasks-loaded [{:id 1 :description "A"} {:id 2 :description "B"}]]
+         (cljs-eval one.sample.model
+                    (task-list-event []
+                                     [{:id 1 :description "A"} {:id 2 :description "B"}]))))
+  (is (= [:task-toggled {:id 1 :complete true}]
+         (cljs-eval one.sample.model
+                    (task-list-event [{:id 1 :complete false}] [{:id 1 :complete true}])))))
