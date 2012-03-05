@@ -30,42 +30,6 @@
 (defmethod render-button [:editing :finished] [_]
   (fx/enable-button "task-button"))
 
-(defmulti render-form-field
-  "Render a form field based on the current state transition. Form
-  fields are validated as soon as they lose focus. There are six
-  transitions and each one has its own animation."
-  :transition)
-
-(defmethod render-form-field :default [_])
-
-;; (defn- label-xpath
-;;   "Accepts an element id for an input field and return the xpath
-;;   string to the label for that field."
-;;   [id]
-;;   (str "//label[@id='" id "-label']/span"))
-
-;; (defmethod render-form-field [:editing-valid :valid] [{:keys [id]}]
-;;   (fx/label-fade-out (label-xpath id)))
-
-;; (defmethod render-form-field [:valid :editing-valid] [{:keys [id]}]
-;;   (play (label-xpath id) fx/fade-in))
-
-;; (defn- swap-label-messages [id message]
-;;   (let [lbl (label-xpath id)]
-;;     (play lbl (assoc fx/fade-out :time 100)
-;;              {:name "fade out label"})
-;;     (play lbl fx/fade-in {:before #(set-text! (xpath lbl) message)})))
-
-;; (defmethod render-form-field [:valid :empty] [{:keys [id]}]
-;;   (swap-label-messages id "Enter task description.")
-;;   (play (label-xpath id) fx/fade-in))
-
-;; (defmethod render-form-field [:editing :editing-valid] [{:keys [id]}]
-;;   (swap-label-messages id "Press enter to create task."))
-
-;; (defmethod render-form-field [:editing-valid :editing] [{:keys [id]}]
-;;   (swap-label-messages id "Enter task description."))
-
 (defn- add-input-event-listeners
   "Accepts a field-id and creates listeners for blur and focus events which will then fire
   `:field-changed` and `:editing-field` events."
@@ -101,21 +65,8 @@
 
 (dispatch/react-to #{:state-change} (fn [_ m] (render m)))
 
-(defn- form-fields-status
-  "Given a map of old and new form states, generate a map with `:id`,
-  `:transition` and `:error` keys which can be passed to
-  `render-form-field`."
-  [m]
-  (map #(hash-map :id %
-                  :transition [(or (-> m :old :fields % :status) :empty)
-                               (-> m :new :fields % :status)]
-                  :error (-> m :new :fields % :error))
-       (keys (-> m :new :fields))))
-
 (dispatch/react-to #{:form-change}
                    (fn [_ m]
-                     (doseq [s (form-fields-status m)]
-                       (render-form-field s))
                      (render-button [(-> m :old :status)
                                      (-> m :new :status)] )))
 

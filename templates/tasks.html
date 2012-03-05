@@ -1,27 +1,28 @@
 <_within file="application.html">
-
   <div id="content">
-
-    <div id="tasks">
-      <div id="task-form">
-        <h1 id="header">Task-a-lator</h1>
-
-        <div class="input">
-          <label id="task-input-label">
-            <span>Enter task description</span>
-            <input id="task-input" size="30" type="text"/>
-          </label>
-          <div id="task-input-error" class="small error">&nbsp;</div>
-          <input id="task-button" class="button green" type="button" value="Add!">
-
+    <div id="tasks-view">
+      <div class="row">
+        <div class="span6 offset2">
+          <div id="task-form">
+            <h1>Task-a-lator-inator</h1>
+            <form class="well">
+              <label id="task-input-label">
+                <span>Enter task description</span>
+                <input id="task-input" size="30" type="text"/>
+              </label>
+              <input id="task-button" class="btn-primary" type="button" value="Add!">
+            </form>
+          </div>
         </div>
       </div>
-
-      <div>
-        <ul id="task-list">
-        </ul>
+      <div class="row">
+        <div class="span6 offset2">
+          <div>
+            <ul id="task-list">
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
-
   </div>
 </_within>

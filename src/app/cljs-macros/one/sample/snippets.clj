@@ -11,4 +11,4 @@
   "Expands to a map of HTML snippets which are extracted from the
   design templates."
   []
-  {:tasks (snippet "tasks.html" [:div#tasks])})
+  {:tasks (snippet "tasks.html" [:div#tasks-view])})
