@@ -188,3 +188,9 @@
                          (dispatch/fire :add-task
                                         {:task {:description (-> form-data :fields "task-input" :value)
                                                 :complete false}})))))
+(dispatch/react-to #{:task-clicked}
+                   (fn [_ id]
+                     (swap! task-list
+                            (fn [old]
+                              (let [t (first (filter #(= (:id %) id) old))]
+                                (replace {t (assoc t :complete (not (:complete t)))} old))))))

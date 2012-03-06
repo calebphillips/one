@@ -82,10 +82,17 @@
              (:description t)
              "</t>")])))
 
+(defn add-task-listener [id]
+  (event/listen (by-id id)
+                "change"
+                #(dispatch/fire :task-clicked
+                                (js/parseInt (last (.split id "-")) 10))))
+
 (defn render-tasks [opacity eff & tasks]
   (let [ul (by-id "task-list")]
     (doseq [[id html] (map #(new-task-li % opacity) tasks)]
       (append! ul html)
+      (add-task-listener id)
       (eff id))))
 
 (def render-existing-tasks (partial render-tasks 1 identity))
