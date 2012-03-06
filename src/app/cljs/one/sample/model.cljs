@@ -190,7 +190,12 @@
                                                 :complete false}})))))
 (dispatch/react-to #{:task-clicked}
                    (fn [_ id]
-                     (swap! task-list
-                            (fn [old]
-                              (let [t (first (filter #(= (:id %) id) old))]
-                                (replace {t (assoc t :complete (not (:complete t)))} old))))))
+                     (let [old (first (filter #(= (:id %) id) @task-list))
+                           new (assoc old :complete (not (:complete old)))]
+                       (dispatch/fire :update-task {:old old :new new}))))
+
+
+;; (swap! task-list
+;;        (fn [old]
+;;          (let [t (first (filter #(= (:id %) id) old))]
+;;            (replace {t (assoc t :complete (not (:complete t)))} old))))

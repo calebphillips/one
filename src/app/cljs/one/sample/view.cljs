@@ -2,12 +2,13 @@
   one.sample.view
   (:use [domina :only (set-html! set-styles! styles by-id set-style!
                                  by-class value set-value! set-text! nodes single-node
-                                 html append!)]
+                                 html append! add-class!)]
         [domina.xpath :only (xpath)]
         [one.browser.animation :only (play)])
   (:require-macros [one.sample.snippets :as snippets])
   (:require [goog.events.KeyCodes :as key-codes]
             [goog.events.KeyHandler :as key-handler]
+            [goog.style :as style]
             [clojure.browser.event :as event]
             [one.dispatch :as dispatch]
             [one.sample.animation :as fx]))
@@ -78,7 +79,9 @@
         (str "<li id='" li-id
              "' style='opacity: "
              opacity
-             ";'><input type='checkbox'> "
+             ";'><input type='checkbox' "
+             (when (:complete t) "checked='checked'")
+             "> "
              (:description t)
              "</t>")])))
 
@@ -88,12 +91,17 @@
                 #(dispatch/fire :task-clicked
                                 (js/parseInt (last (.split id "-")) 10))))
 
+;; Move part of this to animation ns?
 (defn render-tasks [opacity eff & tasks]
   (let [ul (by-id "task-list")]
-    (doseq [[id html] (map #(new-task-li % opacity) tasks)]
-      (append! ul html)
-      (add-task-listener id)
-      (eff id))))
+    (doseq [t tasks]
+      (let [[id html] (new-task-li t opacity)]
+        (append! ul html)
+        (when (:complete t)
+          (style/setOpacity (by-id id) 0.4)
+          (add-class! (by-id id) "struck-out"))
+        (add-task-listener id)
+        (eff id)))))
 
 (def render-existing-tasks (partial render-tasks 1 identity))
 (def render-new-task (partial render-tasks 0 fx/show-new-task))

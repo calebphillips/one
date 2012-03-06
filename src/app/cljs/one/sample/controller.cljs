@@ -44,5 +44,11 @@
 (defmethod action :add-task [{task :task}]
   (r-post :add-task {:task task} #(swap! task-list conj %)))
 
-(dispatch/react-to #{:init :add-task}
+(defmethod action :update-task [{:keys [old new]}]
+  (r-post :update-task {:task new}
+          #(swap! task-list
+                  (fn [old-list]
+                    (replace {old %} old-list)))))
+
+(dispatch/react-to #{:init :add-task :update-task}
                    (fn [t d] (action (assoc d :type t))))

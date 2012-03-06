@@ -27,6 +27,14 @@
     (swap! *task-list* conj t)
     t))
 
+(defmethod remote :update-task [data]
+  (let [new-t (-> data :args :task)]
+    (swap! *task-list*
+           (fn [old-list]
+             (let [old-t (first (filter #(= (:id %) (:id new-t)) old-list))]
+               (replace {old-t (merge old-t new-t)} old-list))))
+    new-t))
+
 (defmethod remote :list-tasks [data]
   {:task-list @*task-list*})
 
