@@ -70,11 +70,26 @@
                      (render-button [(-> m :old :status)
                                      (-> m :new :status)] )))
 
-;; TODO Better way to add the li?
-(defn render-new-tasks [& tasks]
+(defn new-task-li 
+  ([t] (new-task-li t 1))
+  ([t opacity]
+     (let [li-id (str "task-" (:id t))]
+       [li-id
+        (str "<li id='" li-id
+             "' style='opacity: "
+             opacity
+             ";'><input type='checkbox'> "
+             (:description t)
+             "</t>")])))
+
+(defn render-tasks [opacity eff & tasks]
   (let [ul (by-id "task-list")]
-    (doseq [t tasks]
-      (append! ul (str "<li><input type='checkbox'> " (:description t) "</t>")))))
+    (doseq [[id html] (map #(new-task-li % opacity) tasks)]
+      (append! ul html)
+      (eff id))))
+
+(def render-existing-tasks (partial render-tasks 1 identity))
+(def render-new-task (partial render-tasks 0 fx/show-new-task))
 
 (defn reset-form []
   (set-value! (by-id "task-input") "")
@@ -82,9 +97,9 @@
   (.focus (by-id "task-input") ()))
 
 (dispatch/react-to #{:tasks-loaded}
-                   (fn [_ tasks] (apply render-new-tasks tasks)))
+                   (fn [_ tasks] (apply render-existing-tasks tasks)))
 
 (dispatch/react-to #{:task-added}
                    (fn [_ new-task]
-                     (render-new-tasks new-task)
+                     (render-new-task new-task)
                      (reset-form)))

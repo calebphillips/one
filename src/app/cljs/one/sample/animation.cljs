@@ -27,6 +27,9 @@
 (def fade-in {:effect :fade :end 1 :time 400})
 (def fade-out {:effect :fade :end 0 :time 400})
 
+(defn show-new-task [id]
+  (play (by-id id) (assoc  fade-in :time 600)))
+
 (defn disable-button
   "Accepts an element id for a button and disables it. Fades the
   button to 0.2 opacity."
