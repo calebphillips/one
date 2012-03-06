@@ -1,6 +1,6 @@
 (ns ^{:doc "Contains client-side state, validators for input fields
  and functions which react to changes made to the input fields."}
- one.sample.model
+  one.sample.model
   (:require [one.dispatch :as dispatch]))
 
 (def ^{:doc
@@ -26,19 +26,31 @@
              with the list on the server by the controller."}
   task-list (atom []))
 
-(defn task-list-event [old new]
+(defn- find-added-tasks [old new]
+  (filter (fn [[id tasks]] (= 1 (count tasks)))
+          (group-by :id (concat old new))))
+
+(defn- find-toggled-tasks [old new]
+  (filter (fn [[id tasks]]
+            (not (apply = (map :complete tasks))))
+          (group-by :id (concat old new))))
+
+(defn tl-change->events [old new]
   (let [load? (> (- (count new) (count old)) 1)
-        grouped (group-by :id (concat old new))
-        added (first (filter (fn [[id tasks]] (= 1 (count tasks))) grouped))
-        with-diff (first (remove (fn [[id tasks]] (apply = tasks)) grouped))]
+        added (map (fn [[id [task]]] [:task-added task])
+                   (find-added-tasks old new))
+        toggled (map (fn [[id [old-t new-t]]]
+                       [:task-toggled {:id id :complete (:complete new-t)}])
+                     (find-toggled-tasks old new))]
     (cond
-     load? [:tasks-loaded new]
-     added [:task-added (first (second added))]
-     with-diff [:task-toggled (let [[id [old new]] with-diff] {:id id :complete (:complete new)})])))
+     load? [[:tasks-loaded new]]
+     (seq added) added
+     (seq toggled) toggled
+     :else [])))
 
 (add-watch task-list :task-list-change-key
            (fn [k r o n]
-              (dispatch/fire :task-list-change {:old o :new n})))
+             (dispatch/fire :task-list-change {:old o :new n})))
 
 (defmulti ^:private new-status
   (fn [& args] (vec args)))
@@ -169,8 +181,8 @@
                      (set-editing id)))
 
 (dispatch/react-to #{:form-submit}
-  (fn [t d]
-    (let [form-data @task-form]
-      (when (= (:status form-data) :finished)
-        (dispatch/fire :add-task
-                       {:task (-> form-data :fields "task-input" :value)})))))
+                   (fn [t d]
+                     (let [form-data @task-form]
+                       (when (= (:status form-data) :finished)
+                         (dispatch/fire :add-task
+                                        {:task (-> form-data :fields "task-input" :value)})))))

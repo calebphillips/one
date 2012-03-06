@@ -31,15 +31,18 @@
                     (deref task-form)))))
 
 
-(deftest test-task-list-event
-  (is (= [:task-added {:id 1 :description "Do this"}]
+(deftest test-tl-change->events
+  (is (= [[:task-added {:id 1 :description "Do this"}]]
          (cljs-eval one.sample.model
-                    (task-list-event []
+                    (tl-change->events []
                                      [{:id 1 :description "Do this"}]))))
-  (is (= [:tasks-loaded [{:id 1 :description "A"} {:id 2 :description "B"}]]
+  (is (= [[:tasks-loaded [{:id 1 :description "A"} {:id 2 :description "B"}]]]
          (cljs-eval one.sample.model
-                    (task-list-event []
+                    (tl-change->events []
                                      [{:id 1 :description "A"} {:id 2 :description "B"}]))))
-  (is (= [:task-toggled {:id 1 :complete true}]
+  (is (= [[:task-toggled {:id 1 :complete true}]]
          (cljs-eval one.sample.model
-                    (task-list-event [{:id 1 :complete false}] [{:id 1 :complete true}])))))
+                    (tl-change->events [{:id 1 :complete false}] [{:id 1 :complete true}]))))
+  (is (= []
+         (cljs-eval one.sample.model
+                    (tl-change->events [] [])))))
