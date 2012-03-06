@@ -3,7 +3,8 @@
   one.sample.animation
   (:use [one.core :only (start)]
         [one.browser.animation :only (bind parallel serial play play-animation)]
-        [domina :only (by-id set-html! set-styles! destroy-children! append! single-node)]
+        [domina :only (by-id set-html! set-styles! destroy-children! append! single-node
+                             add-class! remove-class!)]
         [domina.xpath :only (xpath)])
   (:require [goog.dom.forms :as gforms]
             [goog.style :as style]))
@@ -28,7 +29,17 @@
 (def fade-out {:effect :fade :end 0 :time 400})
 
 (defn show-new-task [id]
-  (play (by-id id) (assoc  fade-in :time 600)))
+  (play (by-id id) (assoc fade-in :time 600)))
+
+(defn fade-task-out [id]
+  (let [li (by-id id)]
+    (play li (assoc fade-out :end 0.4 :time 200))
+    (add-class! li "struck-out")))
+
+(defn fade-task-in [id]
+  (let [li (by-id id)]
+    (play li fade-in)
+    (remove-class! li "struck-out")))
 
 (defn disable-button
   "Accepts an element id for a button and disables it. Fades the

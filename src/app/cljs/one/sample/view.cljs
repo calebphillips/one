@@ -110,3 +110,10 @@
                    (fn [_ new-task]
                      (render-new-task new-task)
                      (reset-form)))
+
+(dispatch/react-to #{:task-toggled}
+                   (fn [_ {:keys [id complete]}]
+                     (let [task-id (str "task-" id)]
+                       (if complete
+                         (fx/fade-task-out task-id)
+                         (fx/fade-task-in task-id)))))

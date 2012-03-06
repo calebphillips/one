@@ -12,6 +12,10 @@ ul#task-list li {
     list-style-type: none;
 }
 
+.struck-out {
+    text-decoration: line-through;
+}
+
 @font-face {
   font-family: "Chunkfive";
   src: url("fonts/Chunkfive-webfont.eot");
