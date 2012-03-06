@@ -42,7 +42,7 @@
   (r-get :list-tasks {} #(reset! task-list (:task-list %))))
 
 (defmethod action :add-task [{task :task}]
-  (r-post :add-task {:task task} #(swap! task-list conj task)))
+  (r-post :add-task {:task task} #(swap! task-list conj %)))
 
 (dispatch/react-to #{:init :add-task}
                    (fn [t d] (action (assoc d :type t))))

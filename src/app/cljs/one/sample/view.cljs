@@ -71,18 +71,20 @@
                                      (-> m :new :status)] )))
 
 ;; TODO Better way to add the li?
-(defn render-new-tasks [tasks]
+(defn render-new-tasks [& tasks]
   (let [ul (by-id "task-list")]
     (doseq [t tasks]
-      (append! ul (str "<li><input type='checkbox'> " t "</t>")))))
+      (append! ul (str "<li><input type='checkbox'> " (:description t) "</t>")))))
 
 (defn reset-form []
   (set-value! (by-id "task-input") "")
   (dispatch/fire [:field-finished "task-input"] "")
   (.focus (by-id "task-input") ()))
 
-(dispatch/react-to #{:task-list-change}
-                   (fn [_ {:keys [old new]}]
-                     (render-new-tasks
-                      (filter #(not ((set old) %)) new))
+(dispatch/react-to #{:tasks-loaded}
+                   (fn [_ tasks] (apply render-new-tasks tasks)))
+
+(dispatch/react-to #{:task-added}
+                   (fn [_ new-task]
+                     (render-new-tasks new-task)
                      (reset-form)))

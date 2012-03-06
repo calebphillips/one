@@ -5,6 +5,11 @@
 
 (defonce ^:dynamic *task-list* (atom []))
 
+(defonce ^:dynamic *task-id* (atom 10000))
+
+(defn- next-id []
+  (swap! *task-id* inc))
+
 (defmulti remote
   "Multimethod to handle incoming API calls. Implementations are
   selected based on the :fn key in the data sent by the client.
@@ -18,9 +23,9 @@
   {:status :error :message "Unknown endpoint."})
 
 (defmethod remote :add-task [data]
-  (let [t (-> data :args :task)]
+  (let [t (assoc (-> data :args :task) :id (next-id))]
     (swap! *task-list* conj t)
-    {}))
+    t))
 
 (defmethod remote :list-tasks [data]
   {:task-list @*task-list*})

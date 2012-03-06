@@ -50,7 +50,8 @@
 
 (add-watch task-list :task-list-change-key
            (fn [k r o n]
-             (dispatch/fire :task-list-change {:old o :new n})))
+             (doseq [[evt-id data] (tl-change->events o n)]
+               (dispatch/fire evt-id data))))
 
 (defmulti ^:private new-status
   (fn [& args] (vec args)))
@@ -185,4 +186,5 @@
                      (let [form-data @task-form]
                        (when (= (:status form-data) :finished)
                          (dispatch/fire :add-task
-                                        {:task (-> form-data :fields "task-input" :value)})))))
+                                        {:task {:description (-> form-data :fields "task-input" :value)
+                                                :complete false}})))))
