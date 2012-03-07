@@ -1,10 +1,6 @@
 (ns ^{:doc "Render the views for the application."}
   one.sample.view
-  (:use [domina :only (set-html! set-styles! styles by-id set-style!
-                                 by-class value set-value! set-text! nodes single-node
-                                 html append! add-class!)]
-        [domina.xpath :only (xpath)]
-        [one.browser.animation :only (play)])
+  (:use [domina :only (by-id value set-value! append! add-class!)])
   (:require-macros [one.sample.snippets :as snippets])
   (:require [goog.events.KeyCodes :as key-codes]
             [goog.events.KeyHandler :as key-handler]
@@ -83,7 +79,7 @@
              (when (:complete t) "checked='checked'")
              "> "
              (:description t)
-             "</t>")])))
+             "</li>")])))
 
 (defn add-task-listener [id]
   (event/listen (by-id id)
