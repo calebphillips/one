@@ -67,6 +67,8 @@
                      (render-button [(-> m :old :status)
                                      (-> m :new :status)] )))
 
+;; TODO Can't use enlive or hiccup in cljs.
+;; What's a better way to do this? Closure soy templates?
 (defn new-task-li 
   ([t] (new-task-li t 1))
   ([t opacity]
