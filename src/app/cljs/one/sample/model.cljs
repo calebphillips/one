@@ -35,7 +35,12 @@
             (not (apply = (map :complete tasks))))
           (group-by :id (concat old new))))
 
-(defn tl-change->events [old new]
+(defn tl-change->events
+  "Returns a vector of tuples of events (with accompanying data) that should
+  be fired based on the type of change(s) that were made to the task list.
+
+   For example: [[:task-added {:id 123 :description \"Do this\" :complete false}]]"
+  [old new]
   (let [load? (> (- (count new) (count old)) 1)
         added (map (fn [[id [task]]] [:task-added task])
                    (find-added-tasks old new))
@@ -54,15 +59,11 @@
                (dispatch/fire evt-id data))))
 
 (defmulti ^:private new-status
+  "Determine the new :status of a form input field based on:
+    1) its preivous status
+    2) what just happended to it (value was changed, got focus, lost focus...)
+    3) The current state of its value (empty, error, valid)"
   (fn [& args] (vec args)))
-
-(def error-status
-  {:status :error
-   :error "Are you sure about that? Names must have at least two characters."})
-
-(def editing-error-status
-  {:status :editing-error
-   :error "Names must have at least two characters."})
 
 (defmethod new-status [:empty :focus :empty] [p e f]
   {:status :editing})
@@ -80,7 +81,7 @@
   {:status :editing-valid})
 
 (defmethod new-status [:editing :finished :error] [p e f]
-  error-status)
+  {:status :error})
 
 (defmethod new-status [:editing-valid :change :error] [p e f]
   {:status :editing})
@@ -95,13 +96,13 @@
   {:status :valid})
 
 (defmethod new-status [:error :focus :error] [p e f]
-  editing-error-status)
+  {:status :editing-error})
 
 (defmethod new-status [:editing-error :change :error] [p e f]
-  editing-error-status)
+  {:status :editing-error})
 
 (defmethod new-status [:editing-error :finished :error] [p e f]
-  error-status)
+  {:status :error})
 
 (defmethod new-status [:editing-error :change :valid] [p e f]
   {:status :editing-valid})
@@ -181,21 +182,28 @@
                    (fn [[_ id] _]
                      (set-editing id)))
 
+(defn- new-task [d]
+  {:description d :complete false})
+
+(defn- toggle-complete [t]
+  (assoc t :complete (not (:complete t))))
+
 (dispatch/react-to #{:form-submit}
                    (fn [t d]
                      (let [form-data @task-form]
                        (when (= (:status form-data) :finished)
                          (dispatch/fire :add-task
-                                        {:task {:description (-> form-data :fields "task-input" :value)
-                                                :complete false}})))))
+                                        {:task (-> form-data
+                                                   :fields
+                                                   "task-input"
+                                                   :value
+                                                   new-task)})))))
+
+(defn- find-task-by-id [id]
+  (first (filter #(= (:id %) id) @task-list)))
+
 (dispatch/react-to #{:task-clicked}
                    (fn [_ id]
-                     (let [old (first (filter #(= (:id %) id) @task-list))
-                           new (assoc old :complete (not (:complete old)))]
-                       (dispatch/fire :update-task {:old old :new new}))))
-
-
-;; (swap! task-list
-;;        (fn [old]
-;;          (let [t (first (filter #(= (:id %) id) old))]
-;;            (replace {t (assoc t :complete (not (:complete t)))} old))))
+                     (let [t (find-task-by-id id)]
+                       (dispatch/fire :update-task
+                                      {:old t :new (toggle-complete t)}))))

@@ -5,8 +5,6 @@
             [one.dispatch :as dispatch]
             [one.sample.view :as view]))
 
-;; **TODO:** Add marginalia comment to explain what `:export` is for.
-
 (defn- server
   "Return a string which is the scheme and domain portion of the URL
   for the server from which this code was served."

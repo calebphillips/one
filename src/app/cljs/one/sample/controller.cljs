@@ -13,7 +13,10 @@
 
   Actions may cause state changes on the client or the server. This
   function dispatches on the value of the `:type` key and currently
-  supports `:init`, `:form`, and `:greeting` actions.
+  supports only `:init` action.
+
+  Actions to be added in the future  might include :list, :log-in and
+  :preferences
 
   The `:init` action will initialize the appliation's state. "
   :type)
