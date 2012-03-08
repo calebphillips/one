@@ -1,7 +1,8 @@
 (ns ^{:doc "Defines animations which are used in the sample
   application."}
   one.sample.animation
-  (:use [one.browser.animation :only (play)]
+  (:use [one.core :only (start)]
+        [one.browser.animation :only (play bind)]
         [domina :only (by-id set-html! set-styles! destroy-children! single-node
                              add-class! remove-class!)]
         [domina.xpath :only (xpath)])
@@ -27,8 +28,13 @@
 (def fade-in {:effect :fade :end 1 :time 400})
 (def fade-out {:effect :fade :end 0 :time 400})
 
+(def white [255 255 255])
+(def smokey [235 235 235])
 (defn show-new-task [id]
-  (play (by-id id) (assoc fade-in :time 400)))
+  (start (bind (by-id id)
+               [(assoc fade-in :time 400)
+                {:effect :bg-color :start white :end smokey :time 400}]
+               {:effect :bg-color :start smokey :end white :time 800})))
 
 (defn fade-task-out [id]
   (let [li (by-id id)]
