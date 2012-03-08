@@ -28,17 +28,19 @@
 (def fade-out {:effect :fade :end 0 :time 400})
 
 (defn show-new-task [id]
-  (play (by-id id) (assoc fade-in :time 600)))
+  (play (by-id id) (assoc fade-in :time 400)))
 
 (defn fade-task-out [id]
   (let [li (by-id id)]
     (play li (assoc fade-out :end 0.4 :time 200))
-    (add-class! li "struck-out")))
+    (remove-class! li "not-completed")
+    (add-class! li "completed")))
 
 (defn fade-task-in [id]
   (let [li (by-id id)]
     (play li fade-in)
-    (remove-class! li "struck-out")))
+    (remove-class! li "completed")
+    (add-class! li "not-completed")))
 
 (defn disable-button
   "Accepts an element id for a button and disables it. Fades the

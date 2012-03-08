@@ -12,8 +12,14 @@ ul#task-list li {
     list-style-type: none;
 }
 
-.struck-out {
+.completed {
+    opacity: 0.4;
     text-decoration: line-through;
+}
+
+.not-completed {
+    opacity: 1;
+    text-decoration: none;
 }
 
 @font-face {

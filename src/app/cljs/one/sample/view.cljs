@@ -1,6 +1,6 @@
 (ns ^{:doc "Render the views for the application."}
   one.sample.view
-  (:use [domina :only (by-id value set-value! append! add-class!)])
+  (:use [domina :only (by-id value set-value! append! add-class! set-text!)])
   (:require-macros [one.sample.snippets :as snippets])
   (:require [goog.events.KeyCodes :as key-codes]
             [goog.events.KeyHandler :as key-handler]
@@ -67,42 +67,32 @@
                      (render-button [(-> m :old :status)
                                      (-> m :new :status)] )))
 
-;; TODO Can't use enlive or hiccup in cljs.
-;; What's a better way to do this? Closure soy templates?
-(defn new-task-li 
-  ([t] (new-task-li t 1))
-  ([t opacity]
-     (let [li-id (str "task-" (:id t))]
-       [li-id
-        (str "<li id='" li-id
-             "' style='opacity: "
-             opacity
-             ";'><input type='checkbox' "
-             (when (:complete t) "checked='checked'")
-             "> "
-             (:description t)
-             "</li>")])))
+(defn task-html [t]
+  (let [id (str "task-" (:id t))]
+    [id
+     (-> snippets
+         ((if (:complete t) :completed-task :task))
+         (.replace #"(id=\")(.*)(\")" (str "$1" id "$3"))
+         (.replace #"(/>)[\s\S]*(</li>)" (str "$1 " (:description t) "$2")))]))
 
 (defn add-task-listener [id]
   (event/listen (by-id id)
                 "change"
-                #(dispatch/fire :task-clicked
-                                (js/parseInt (last (.split id "-")) 10))))
+                #(dispatch/fire
+                  :task-clicked
+                  (js/parseInt (last (.split id "-")) 10))))
 
-;; Move part of this to animation ns?
-(defn render-tasks [opacity eff & tasks]
+(defn render-tasks [f & tasks]
   (let [ul (by-id "task-list")]
-    (doseq [t tasks]
-      (let [[id html] (new-task-li t opacity)]
-        (append! ul html)
-        (when (:complete t)
-          (style/setOpacity (by-id id) 0.4)
-          (add-class! (by-id id) "struck-out"))
-        (add-task-listener id)
-        (eff id)))))
+    (doseq [[id html] (map task-html tasks)]
+      (append! ul html)
+      (f id)
+      (add-task-listener id))))
 
-(def render-existing-tasks (partial render-tasks 1 identity))
-(def render-new-task (partial render-tasks 0 fx/show-new-task))
+(def render-existing-tasks (partial render-tasks identity))
+(def render-new-task (partial render-tasks (fn [id]
+                                   (style/setOpacity (by-id id) 0)
+                                   (fx/show-new-task id))))
 
 (defn reset-form []
   (set-value! (by-id "task-input") "")
