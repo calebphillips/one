@@ -24,7 +24,7 @@
 
 (def ^{:doc "An atom containing the list of tasks, kept in sync
              with the list on the server by the controller."}
-  task-list (atom []))
+  task-list (atom {:state :init :list []}))
 
 (defn- find-added-tasks [old new]
   (filter (fn [[id tasks]] (= 1 (count tasks)))
@@ -35,22 +35,25 @@
             (not (apply = (map :complete tasks))))
           (group-by :id (concat old new))))
 
+(defn- task-toggled [[id [old new]]]
+  [:task-toggled {:id id :complete (:complete new)}])
+
+(defn- task-added [[id [task]]]
+  [:task-added task])
+
 (defn tl-change->events
   "Returns a vector of tuples of events (with accompanying data) that should
-  be fired based on the type of change(s) that were made to the task list.
+   be fired based on the type of change(s) that were made to the task list.
 
    For example: [[:task-added {:id 123 :description \"Do this\" :complete false}]]"
   [old new]
-  (let [load? (> (- (count new) (count old)) 1)
-        added (map (fn [[id [task]]] [:task-added task])
-                   (find-added-tasks old new))
-        toggled (map (fn [[id [old-t new-t]]]
-                       [:task-toggled {:id id :complete (:complete new-t)}])
-                     (find-toggled-tasks old new))]
+  (let [load? (= [:init :loaded] (map :state [old new]))
+        added (find-added-tasks (:list old) (:list new))
+        toggled (find-toggled-tasks (:list old) (:list new))]
     (cond
-     load? [[:tasks-loaded new]]
-     (seq added) added
-     (seq toggled) toggled
+     load? [[:tasks-loaded (:list new)]]
+     (seq added) (map task-added added)
+     (seq toggled) (map task-toggled toggled)
      :else [])))
 
 (add-watch task-list :task-list-change-key
@@ -200,7 +203,7 @@
                                                    new-task)})))))
 
 (defn- find-task-by-id [id]
-  (first (filter #(= (:id %) id) @task-list)))
+  (first (filter #(= (:id %) id) (:list @task-list))))
 
 (dispatch/react-to #{:task-clicked}
                    (fn [_ id]

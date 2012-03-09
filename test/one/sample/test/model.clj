@@ -23,26 +23,27 @@
 
 (use-fixtures :once setup)
 
-(deftest test-set-editing
-  (cljs-eval one.sample.model (reset! task-form {}))
-  (is (= {:fields {"task-input" {:status :editing, :value nil}}, :status :finished}
-         (cljs-eval one.sample.model
-                    (set-editing "task-input")
-                    (deref task-form)))))
-
 
 (deftest test-tl-change->events
-  (is (= [[:task-added {:id 1 :description "Do this"}]]
+
+  (is (= [[:tasks-loaded []]]
          (cljs-eval one.sample.model
-                    (tl-change->events []
-                                     [{:id 1 :description "Do this"}]))))
+                    (tl-change->events {:state :init :list []}
+                                       {:state :loaded :list []}))))
   (is (= [[:tasks-loaded [{:id 1 :description "A"} {:id 2 :description "B"}]]]
          (cljs-eval one.sample.model
-                    (tl-change->events []
-                                     [{:id 1 :description "A"} {:id 2 :description "B"}]))))
+                    (tl-change->events {:state :init :list []}
+                                       {:state :loaded
+                                        :list [{:id 1 :description "A"} {:id 2 :description "B"}]}))))
+  (is (= [[:task-added {:id 1 :description "Do this"}]]
+         (cljs-eval one.sample.model
+                    (tl-change->events {:state :loaded :list []}
+                                       {:state :loaded :list [{:id 1 :description "Do this"}]}))))
   (is (= [[:task-toggled {:id 1 :complete true}]]
          (cljs-eval one.sample.model
-                    (tl-change->events [{:id 1 :complete false}] [{:id 1 :complete true}]))))
+                    (tl-change->events {:state :loaded :list [{:id 1 :complete false}]}
+                                       {:state :loaded :list [{:id 1 :complete true}]}))))
   (is (= []
          (cljs-eval one.sample.model
-                    (tl-change->events [] [])))))
+                    (tl-change->events {:state :loaded :list []}
+                                       {:state :loaded :list []})))))

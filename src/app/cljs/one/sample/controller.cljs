@@ -42,16 +42,22 @@
 
 (defmethod action :init [_]
   (reset! state {:state :init})
-  (r-get :list-tasks {} #(reset! task-list (:task-list %))))
+  (r-get :list-tasks {} #(reset! task-list {:state :loaded :list (:task-list %)})))
 
 (defmethod action :add-task [{task :task}]
-  (r-post :add-task {:task task} #(swap! task-list conj %)))
+  (r-post :add-task {:task task}
+          #(swap! task-list
+                  (fn [old-state]
+                    (update-in old-state [:list] conj %)))))
 
+;; Not working - events are getting sent to this incorrectly, I believe.
 (defmethod action :update-task [{:keys [old new]}]
   (r-post :update-task {:task new}
           #(swap! task-list
-                  (fn [old-list]
-                    (replace {old %} old-list)))))
+                  (fn [old-state]
+                    (update-in old-state
+                               [:list]
+                               (fn [ls] (replace {old %} ls)))))))
 
 (dispatch/react-to #{:init :add-task :update-task}
                    (fn [t d] (action (assoc d :type t))))

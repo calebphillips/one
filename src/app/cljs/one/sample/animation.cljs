@@ -29,12 +29,12 @@
 (def fade-out {:effect :fade :end 0 :time 400})
 
 (def white [255 255 255])
-(def smokey [235 235 235])
+(def smoky [235 235 235])
 (defn show-new-task [id]
   (start (bind (by-id id)
                [(assoc fade-in :time 400)
-                {:effect :bg-color :start white :end smokey :time 400}]
-               {:effect :bg-color :start smokey :end white :time 800})))
+                {:effect :bg-color :start white :end smoky :time 400}]
+               {:effect :bg-color :start smoky :end white :time 600})))
 
 (defn fade-task-out [id]
   (let [li (by-id id)]
