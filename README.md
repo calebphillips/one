@@ -1,3 +1,10 @@
+# Todo App
+
+I extracted this code into https://github.com/calebphillips/cljs-todo
+
+This app has a git dependency on ClojurescriptOne, rather than being
+embedded inside of it.
+
 # ClojureScript One
 
 We think that [ClojureScript][] is amazing and that it provides endless
